@@ -1,0 +1,6 @@
+#pip install kafka-python
+kafka-python==2.0.2
+pandas==2.1.0
+numpy==1.23.5
+openpyxl==3.1.2  # Pour XLSX
+xlrd==2.0.1      # Pour XLS
