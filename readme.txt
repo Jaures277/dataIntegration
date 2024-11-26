@@ -1,14 +1,15 @@
-Student Loan Data Integration Project
+#Student Loan Data Integration Project
 Ce projet vise à traiter les données des prêts étudiants en exploitant un pipeline de streaming basé sur Kafka, 
 Spark et une base de données SQLite. L'objectif principal est d'extraire, transformer et charger des données issues de Kafka, tout en les stockant dans une base SQLite pour analyse et traitement.
 
-Prérequis
+#Prérequis
 Avant de commencer, assurez-vous d'avoir installé les éléments suivants :
 
-Docker et Docker Compose : pour exécuter les services nécessaires.
+#Docker et Docker Compose : pour exécuter les services nécessaires.
 Python 3.8+ : pour l'écriture de scripts d'intégration.
 DB Browser for SQLite (optionnel) : pour visualiser les données de la base SQLite.
-Architecture
+
+#Architecture
 Le projet utilise l'architecture suivante :
 
 Kafka : pour le streaming de données des prêts étudiants.
@@ -20,20 +21,21 @@ Installation et démarrage
 Étape 1 : Configuration des services Docker
 Clonez le dépôt du projet :
 
-bash
+#bash
 Copier le code
 git clone <url-du-repo>
 cd student_loan_project
 Vérifiez que le fichier docker-compose.yml est présent. Il contient la configuration des services suivants :
 
-Zookeeper
-Kafka
-Schema Registry
-Spark
-Control Center
-Démarrez les conteneurs avec :
+.Zookeeper
+.Kafka
+.Schema Registry
+.Spark
+.Control Center
 
-bash
+#Démarrez les conteneurs avec :
+
+#bash
 Copier le code
 docker-compose up -d
 Vérifiez que les conteneurs sont opérationnels :
