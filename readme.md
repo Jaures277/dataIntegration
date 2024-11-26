@@ -1,15 +1,16 @@
-#Student Loan Data Integration Project
+
+**Student Loan Data Integration Project**
 Ce projet vise à traiter les données des prêts étudiants en exploitant un pipeline de streaming basé sur Kafka, 
 Spark et une base de données SQLite. L'objectif principal est d'extraire, transformer et charger des données issues de Kafka, tout en les stockant dans une base SQLite pour analyse et traitement.
 
-#Prérequis
+**Prérequis**
 Avant de commencer, assurez-vous d'avoir installé les éléments suivants :
 
-#Docker et Docker Compose : pour exécuter les services nécessaires.
+**Docker et Docker Compose : pour exécuter les services nécessaires.**
 Python 3.8+ : pour l'écriture de scripts d'intégration.
 DB Browser for SQLite (optionnel) : pour visualiser les données de la base SQLite.
 
-#Architecture
+**Architecture**
 Le projet utilise l'architecture suivante :
 
 Kafka : pour le streaming de données des prêts étudiants.
@@ -21,26 +22,26 @@ Installation et démarrage
 Étape 1 : Configuration des services Docker
 Clonez le dépôt du projet :
 
-#bash
+**bash**
 Copier le code
 git clone <url-du-repo>
 cd student_loan_project
 Vérifiez que le fichier docker-compose.yml est présent. Il contient la configuration des services suivants :
 
-.Zookeeper
+**.Zookeeper
 .Kafka
 .Schema Registry
 .Spark
-.Control Center
+.Control Center**
 
-#Démarrez les conteneurs avec :
+**Démarrez les conteneurs avec :**
 
-#bash
+**bash**
 Copier le code
 docker-compose up -d
 Vérifiez que les conteneurs sont opérationnels :
 
-bash
+**bash**
 Copier le code
 docker ps
 Étape 2 : Configuration de Spark Streaming
@@ -52,24 +53,25 @@ Vérifiez que le fichier sqlite-jdbc-3.46.1.2.jar est placé dans ./jars.
 Étape 3 : Streaming des données avec Kafka et Spark
 Lancez le producteur Kafka (génération de données de test) :
 
-bash
+**bash**
 Copier le code
 docker exec -it student_loan_project-kafka-producer-1 python /datas/producer.py
 L'application Spark est configurée pour lire les messages du topic Kafka student_loan_topic et les écrire dans la base SQLite. Assurez-vous que le conteneur Spark est actif :
 
-bash
+**bash**
 Copier le code
 docker logs student_loan_project-spark-1
 Étape 4 : Vérification des données intégrées
 Les données sont stockées dans un fichier SQLite créé automatiquement dans le dossier /data. Pour visualiser les données, utilisez DB Browser for SQLite :
 
 Montez le volume Docker pour accéder au fichier ou copiez-le depuis le conteneur :
-bash
+
+**bash**
 Copier le code
 docker cp student_loan_project-spark-1:/tmp/data/student_loan_data.db ./data/
 Chargez le fichier student_loan_data.db dans DB Browser pour examiner les tables.
 
-Structure des dossiers
+**Structure des dossiers**
 Dossier/Fichier	Description
 app/	Contient les scripts Spark Streaming.
 jars/	Bibliothèque JDBC pour SQLite.
@@ -78,7 +80,7 @@ database/	Répertoire pour le stockage persistant de la base SQLite.
 docker-compose.yml	Configuration des services Docker.
 
 
-Points à améliorer
+**Points à améliorer**
 HDFS : Ajouter un support pour lire les fichiers FL_Dashboard... depuis HDFS.
 Gestion des versions : Mettre en place une stratégie pour gérer différentes versions des données intégrées.
 Documentation : Documenter les choix techniques et les solutions utilisées dans le pipeline.
