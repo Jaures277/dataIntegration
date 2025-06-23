@@ -1,0 +1,66 @@
+FROM bitnami/spark:3.5.1
+
+USER root
+
+ENV SPARK_HOME=/opt/bitnami/spark
+ENV HADOOP_CONF_DIR=$SPARK_HOME/conf
+ENV SPARK_VERSION=3.5.1
+ENV SCALA_VERSION=2.12
+ENV IVY_CACHE_DIR=$SPARK_HOME/ivy
+
+# 📦 Install curl
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN pip install matplotlib && pip install pandas matplotlib
+
+
+# 📥 JDBC PostgreSQL
+RUN curl -L -o $SPARK_HOME/jars/postgresql-42.6.0.jar \
+    https://jdbc.postgresql.org/download/postgresql-42.6.0.jar
+
+# 📥 Kafka JARs (et dépendance manquante: commons-pool2)
+RUN curl -L -o $SPARK_HOME/jars/spark-sql-kafka-0-10_${SCALA_VERSION}-${SPARK_VERSION}.jar \
+      https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_${SCALA_VERSION}/${SPARK_VERSION}/spark-sql-kafka-0-10_${SCALA_VERSION}-${SPARK_VERSION}.jar \
+ && curl -L -o $SPARK_HOME/jars/kafka-clients-3.5.0.jar \
+      https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.5.0/kafka-clients-3.5.0.jar \
+ && curl -L -o $SPARK_HOME/jars/spark-token-provider-kafka-0-10_${SCALA_VERSION}-${SPARK_VERSION}.jar \
+      https://repo1.maven.org/maven2/org/apache/spark/spark-token-provider-kafka-0-10_${SCALA_VERSION}/${SPARK_VERSION}/spark-token-provider-kafka-0-10_${SCALA_VERSION}-${SPARK_VERSION}.jar \
+ && curl -L -o $SPARK_HOME/jars/commons-pool2-2.11.1.jar \
+      https://repo1.maven.org/maven2/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar
+
+# 📥 HDFS dependencies (optionnelles mais utiles)
+RUN curl -L -o $SPARK_HOME/jars/hadoop-common-3.3.6.jar \
+      https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-common/3.3.6/hadoop-common-3.3.6.jar \
+ && curl -L -o $SPARK_HOME/jars/hadoop-hdfs-3.3.6.jar \
+      https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-hdfs/3.3.6/hadoop-hdfs-3.3.6.jar \
+ && curl -L -o $SPARK_HOME/jars/hadoop-auth-3.3.6.jar \
+      https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-auth/3.3.6/hadoop-auth-3.3.6.jar \
+ && curl -L -o $SPARK_HOME/jars/commons-configuration2-2.8.0.jar \
+      https://repo1.maven.org/maven2/org/apache/commons/commons-configuration2/2.8.0/commons-configuration2-2.8.0.jar
+
+# 📁 Configurer le répertoire Ivy (optionnel mais évite erreurs futures)
+RUN mkdir -p $IVY_CACHE_DIR && \
+    echo "spark.jars.ivy=$IVY_CACHE_DIR" >> $SPARK_HOME/conf/spark-defaults.conf
+
+# 🧑‍💻 User app + droits
+RUN adduser --disabled-password --gecos '' spark && \
+    mkdir -p /app && chown -R spark:spark /app
+
+
+# 📂 Copie des fichiers
+COPY spark/step1_kafka_reader.py /app/step1_kafka_reader.py
+COPY spark/run_metrics.sh /app/run_metrics.sh
+COPY spark/calculate_metrics.py /app/calculate_metrics.py
+COPY scheduler.sh /app/scheduler.sh
+
+RUN chmod +x /app/run_metrics.sh /app/scheduler.sh /app/calculate_metrics.py /app/step1_kafka_reader.py
+
+
+
+USER spark
+WORKDIR /app
+
+# 🚀 CMD pour lancer cron ET Spark console
+CMD bash -c "/app/scheduler.sh & tail -f /app/cron_metrics.log"
+
+
+ENTRYPOINT ["spark-submit"]

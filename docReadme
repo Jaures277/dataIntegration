@@ -1,0 +1,91 @@
+source menv/bin/activate
+
+docker compose down -v
+docker compose build
+docker compose up -d zookeeper kafka namenode datanode postgres
+docker compose ps (verification)
+python cleaning.py
+
+
+docker compose run --rm cleaner
+docker compose build cleaner
+docker compose run --rm cleaner
+
+
+
+#verification du fichier dans hdfs
+docker exec -it namenode bash 
+hdfs dfs -ls /data
+#afficher des donnees 
+hdfs dfs -cat /data/FL_Dashboard_merged.csv | head -n 5
+
+
+docker exec -i postgres psql -U admin -d pret_etudiant_db < init-scripts/init.sql
+
+
+
+docker compose run --rm spark-producer (Exécuter le producer pour lire le CSV depuis HDFS et envoyer dans Kafka)
+http://localhost:9001/topic/pret_etudiant/allmessages (consulter en temps relle)
+docker compose run --rm spark-producer
+
+
+docker compose build spark-consumer (Rebuild l’image)
+docker compose up -d spark-consumer (Relance le consumer)
+docker compose logs -f spark-consumer (Surveille les logs )
+
+docker compose run --rm spark-consumer bash
+spark-submit /app/step1_kafka_reader.py
+docker compose run --rm spark-consumer cat /app/step1_kafka_reader.py (execution directe)
+
+
+docker cp step1_kafka_reader.py spark:/app/step1_kafka_reader.py
+docker exec -it spark bash
+spark-submit /app/step1_kafka_reader.py
+
+
+docker compose exec postgres psql -U admin -d pret_etudiant_db (verifier lexistance de la bd)
+
+# (Optionnel) Vérifie dans le namenode
+docker exec -it namenode bash
+hdfs dfs -ls /user/spark/metrics
+
+docker compose run --rm spark-consumer bash
+spark-submit /app/calculate_metrics.py
+
+
+Tu veux que je t’en fasse une version qui tourne tous les jours automatiquement avec cron ou Airflow ?
+chmod +x /app/run_metrics.sh
+
+Ton script calculate_metrics.py s’exécute tous les jours à 00:00, automatiquement ⏰
+Les logs sont visibles dans /app/cron_metrics.log.
+
+docker compose build spark-metrics
+docker compose up -d spark-metrics
+
+
+
+chmod +x test_resilience.sh
+./test_resilience.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Voici les captures d’écran à insérer manuellement aux emplacements proposés dans le PDF :
+
+Compétence	Capture suggérée
+Docker + résilience	docker ps + log test_resilience.sh
+Kafka producer	console de producer.py pendant envoi
+Spark Streaming	console spark-submit step1_kafka_reader.py
+Structure HDFS	hdfs dfs -ls -R /user/spark/output
+Enrichissement + métriques	affichage Spark SQL dans calculate_metrics.py
+Cron + Dockerfile	contenu Dockerfile.spark + crontab -l

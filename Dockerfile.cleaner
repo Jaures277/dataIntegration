@@ -1,0 +1,13 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Copier le script de fusion et les fichiers Excel
+COPY fusion_cleaning.py ./
+COPY data/ ./data/
+
+# Installer les dépendances nécessaires
+RUN pip install pandas hdfs openpyxl xlrd
+
+# Commande par défaut
+CMD ["python", "fusion_cleaning.py"]

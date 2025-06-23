@@ -1,0 +1,12 @@
+# hdfs-site.xml
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://namenode:9000</value>
+  </property>
+  <!-- désactivez viewfs si inutile -->
+  <property>
+    <name>fs.viewfs.impl.disable.cache</name>
+    <value>true</value>
+  </property>
+</configuration>

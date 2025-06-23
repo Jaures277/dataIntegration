@@ -1,0 +1,9 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY fusion_clean.py .
+
+RUN pip install pandas hdfs openpyxl xlrd
+
+CMD ["python", "fusion_clean.py"]
